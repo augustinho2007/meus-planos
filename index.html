@@ -88,7 +88,87 @@ transform:rotate(-8deg);animation:scrollprog 6s linear infinite;opacity:.9}
       <!-- Removido o selo "Planos" daqui, como você pediu -->
     </div>
     <div class="panel">
-      <h2>Veja os planos disponíveis</h2>
+      <!-- TÍTULO + BOTÃO SOLICITAR TESTE -->
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+  
+  <h2 style="margin:0;">Veja os planos disponíveis</h2>
+
+  <button type="button"
+    onclick="document.getElementById('trialForm').style.display='block'"
+    style="
+      padding:10px 16px;
+      border-radius:8px;
+      border:2px solid #1f8cff;
+      background:transparent;
+      color:#1f8cff;
+      font-weight:700;
+      cursor:pointer;
+    ">
+    Solicitar teste
+  </button>
+
+</div>
+
+<!-- FORMULÁRIO SOLICITAR TESTE (ENVIA PARA SEU E-MAIL) -->
+<form id="trialForm"
+      action="SEU_ENDPOINT_DO_FORMSPREE"
+      method="POST"
+      style="
+        display:none;
+        margin-bottom:30px;
+        padding:14px;
+        border:1px solid #ddd;
+        border-radius:10px;
+        max-width:460px;
+      ">
+
+  <label><strong>Digite seu e-mail para solicitar o teste:</strong></label><br><br>
+
+  <input type="email"
+         name="email"
+         required
+         placeholder="ex: cliente@email.com"
+         style="
+           width:100%;
+           padding:10px;
+           border-radius:6px;
+           border:1px solid #ccc;
+         ">
+
+  <!-- campos extras (opcional) -->
+  <input type="hidden" name="origem" value="Solicitação de teste - site">
+  <input type="hidden" name="status" value="Teste solicitado (sem pagamento)">
+
+  <br><br>
+
+  <button type="submit"
+    style="
+      padding:10px 16px;
+      border-radius:8px;
+      border:none;
+      background:#1f8cff;
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+    ">
+    Enviar
+  </button>
+
+  <button type="button"
+    onclick="document.getElementById('trialForm').style.display='none'"
+    style="
+      padding:10px 16px;
+      border-radius:8px;
+      border:1px solid #999;
+      background:#eee;
+      margin-left:10px;
+      cursor:pointer;
+    ">
+    Cancelar
+  </button>
+
+</form>
+
       <a class="btn" href="#planos">Ver planos</a>
     </div>
   </div>
@@ -213,27 +293,6 @@ transform:rotate(-8deg);animation:scrollprog 6s linear infinite;opacity:.9}
   </div>
 
   <div class="footer">© <span id="y"></span> READ TV</div>
-</div>
-<div style="margin-top:16px;">
-  <button class="btn" type="button" onclick="document.getElementById('trialForm').style.display='block'">
-    Solicitar teste
-  </button>
-
-  <form id="trialForm" action="https://formspree.io/f/mrbnvkjz" method="POST"
-        style="display:none;margin-top:12px;">
-    <label style="display:block;margin-bottom:6px;">Seu e-mail:</label>
-    <input name="email" type="email" required placeholder="ex: cliente@email.com"
-      style="width:100%;max-width:420px;padding:10px;border-radius:10px;border:1px solid #2a3a52;background:#0f1620;color:#e8eef7;">
-
-    <input type="hidden" name="origem" value="Solicitar teste (site)">
-    <input type="hidden" name="plano_interesse" value="(cliente não pagou ainda)">
-
-    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn" type="submit">Enviar</button>
-      <button class="btn secondary" type="button" onclick="document.getElementById('trialForm').style.display='none'">Cancelar</button>
-    </div>
-    <p class="muted" style="margin-top:10px;">Você vai receber esse contato por e-mail.</p>
-  </form>
 </div>
 
 <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
