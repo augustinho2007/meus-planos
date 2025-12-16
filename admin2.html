@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark">
+  <title>Painel ReadTV (Privado)</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1b2e;
+      --panel2:#0c1628;
+      --text:#eaf1ff;
+      --muted:#9bb0d1;
+      --line:rgba(255,255,255,.08);
+      --accent:#1ee3a4;      /* verde neon */
+      --accent2:#38a6ff;     /* azul neon */
+      --danger:#ff4d6d;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(56,166,255,.15), transparent 50%),
+                  radial-gradient(900px 600px at 90% 30%, rgba(30,227,164,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .wrap{
+      width:min(980px, 100%);
+    }
+
+    header{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin:10px 0 16px;
+    }
+
+    .brand{
+      display:flex; gap:10px; align-items:center;
+    }
+    .logo{
+      width:42px; height:42px; border-radius:12px;
+      background: linear-gradient(135deg, rgba(56,166,255,.35), rgba(30,227,164,.25));
+      border:1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    h1{
+      font-size:18px; margin:0;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:2px 0 0;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-head{
+      padding:14px 14px 12px;
+      background: rgba(0,0,0,.12);
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .card-head strong{
+      font-size:14px;
+      color: var(--text);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+      padding:14px;
+    }
+
+    @media (max-width: 820px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      font-size:12px;
+      color: var(--muted);
+      display:block;
+      margin:0 0 6px;
+    }
+
+    input, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline:none;
+    }
+    input:focus{
+      border-color: rgba(56,166,255,.45);
+      box-shadow: 0 0 0 4px rgba(56,166,255,.12);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:end;
+    }
+    .row > div{ flex:1; min-width: 220px; }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    button{
+      cursor:pointer;
+      border:0;
+      border-radius: 14px;
+      padding:12px 14px;
+      font-weight:700;
+      letter-spacing:.2px;
+      color:#04131c;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 10px 22px rgba(30,227,164,.12);
+    }
+    button.secondary{
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+    button.danger{
+      color:#fff;
+      background: rgba(255,77,109,.14);
+      border: 1px solid rgba(255,77,109,.35);
+    }
+
+    .stats{
+      padding:14px;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 820px){
+      .stats{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi{
+      background: rgba(0,0,0,.16);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:12px;
+    }
+    .kpi .t{
+      color: var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+    .kpi .v{
+      font-size:22px;
+      font-weight:800;
+    }
+    .kpi small{
+      display:block;
+      color: var(--muted);
+      margin-top:4px;
+      font-size:11px;
+    }
+
+    .out{
+      padding:14px;
+      border-top:1px solid var(--line);
+      background: rgba(0,0,0,.12);
+    }
+    .msg{
+      margin:0;
+      color: var(--muted);
+      font-size:13px;
+    }
+    pre{
+      margin:12px 0 0;
+      padding:12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.22);
+      border:1px solid var(--line);
+      color: #dfe9ff;
+      overflow:auto;
+      max-height: 280px;
+      display:none;
+    }
+
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color: var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .dot{
+      width:8px;height:8px;border-radius:99px;
+      background: rgba(255,255,255,.35);
+    }
+    .dot.ok{ background: var(--accent); }
+    .dot.bad{ background: var(--danger); }
+
+    footer{
+      text-align:center;
+      padding:14px 0 0;
+      color: rgba(155,176,209,.75);
+      font-size:12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>Painel ReadTV (Privado)</h1>
+          <div class="sub">Estatísticas de vendas por mês • Senha não é salva</div>
+        </div>
+      </div>
+
+      <span class="pill" id="statusPill">
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText">Pronto</span>
+      </span>
+    </header>
+
+    <div class="card">
+      <div class="card-head">
+        <strong>Consulta</strong>
+        <span class="pill">SERVER: <span id="apiLabel" style="color:#eaf1ff;margin-left:6px;"></span></span>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="row">
+            <div>
+              <label>Sua Senha</label>
+              <input id="token" type="password" placeholder="Cole sua senha aqui..." />
+            </div>
+            <div>
+              <label>Mês</label>
+              <input id="month" type="month" />
+            </div>
+          </div>
+
+          <div class="btns">
+            <button id="btnFetch">Ver estatísticas</button>
+            <button class="secondary" id="btnThisMonth" type="button">Este mês</button>
+            <button class="danger" id="btnClear" type="button">Limpar</button>
+          </div>
+
+          <div style="margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35;">
+            • Você pode abrir isso no celular pelo GitHub Pages. <br>
+            • O token <b>não fica salvo</b> (segurança). Você digita quando quiser consultar.
+          </div>
+        </div>
+
+        <div class="card" style="background:rgba(0,0,0,.12);border:1px solid var(--line);">
+          <div class="card-head" style="background:transparent;border-bottom:1px solid var(--line);">
+            <strong>Resumo do mês</strong>
+            <span class="pill" id="monthLabel">—</span>
+          </div>
+
+          <div class="stats">
+            <div class="kpi">
+              <div class="t">Mensal</div>
+              <div class="v" id="kMensal">—</div>
+              <small>pagamentos aprovados</small>
+            </div>
+            <div class="kpi">
+              <div class="t">Trimestral</div>
+              <div class="v" id="kTrimestral">—</div>
+              <small>pagamentos aprovados</small>
+            </div>
+            <div class="kpi">
+              <div class="t">Anual</div>
+              <div class="v" id="kAnual">—</div>
+              <small>pagamentos aprovados</small>
+            </div>
+            <div class="kpi">
+              <div class="t">Total</div>
+              <div class="v" id="kTotal">—</div>
+              <small>no mês</small>
+            </div>
+          </div>
+
+          <div class="out">
+            <p class="msg" id="msg">Digite a sua Senha, selecione o mês e clique em “Ver estatísticas”.</p>
+            <pre id="raw"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>ReadTV • Painel privado</footer>
+  </div>
+
+<script>
+  const API_BASE = "https://pix.readtv.com.br"; // seu Worker custom domain
+  document.getElementById("apiLabel").textContent = API_BASE;
+
+  const el = (id) => document.getElementById(id);
+
+  function setStatus(type, text){
+    el("statusText").textContent = text;
+    el("statusDot").className = "dot " + (type === "ok" ? "ok" : type === "bad" ? "bad" : "");
+  }
+
+  function toYYYYMM(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    return `${y}-${m}`;
+  }
+
+  function prettyMonthLabel(yyyymm){
+    if(!yyyymm) return "—";
+    const [y,m] = yyyymm.split("-");
+    return `${m}/${y}`;
+  }
+
+  function resetKPIs(){
+    el("kMensal").textContent = "—";
+    el("kTrimestral").textContent = "—";
+    el("kAnual").textContent = "—";
+    el("kTotal").textContent = "—";
+    el("monthLabel").textContent = "—";
+  }
+
+  function showRaw(obj){
+    const raw = el("raw");
+    raw.style.display = "block";
+    raw.textContent = JSON.stringify(obj, null, 2);
+  }
+
+  function hideRaw(){
+    el("raw").style.display = "none";
+  }
+
+  el("month").value = toYYYYMM(new Date());
+  el("monthLabel").textContent = prettyMonthLabel(el("month").value);
+  resetKPIs();
+  setStatus("ok","Pronto");
+
+  el("btnThisMonth").onclick = () => {
+    el("month").value = toYYYYMM(new Date());
+    el("monthLabel").textContent = prettyMonthLabel(el("month").value);
+  };
+
+  el("btnClear").onclick = () => {
+    el("token").value = "";
+    el("msg").textContent = "Digite a sua Senha, selecione o mês e clique em “Ver estatísticas”.";
+    resetKPIs();
+    hideRaw();
+    setStatus("ok","Pronto");
+  };
+
+  let rawVisible = false;
+
+  el("btnFetch").onclick = async () => {
+    const token = el("token").value.trim();
+    const month = el("month").value; // "2025-12"
+
+    el("monthLabel").textContent = prettyMonthLabel(month);
+    hideRaw();
+
+    if(!token){
+      setStatus("bad","Token vazio");
+      el("msg").textContent = "⚠️ Informe o token (ADMIN_TOKEN).";
+      return;
+    }
+
+    setStatus("", "Consultando...");
+    el("msg").textContent = "Carregando dados...";
+
+    // Se seu Worker já aceita ?month=YYYY-MM, ótimo.
+    // Se ainda não, ele vai trazer o mês atual mesmo.
+    const url = month ? `${API_BASE}/admin/stats?month=${encodeURIComponent(month)}` : `${API_BASE}/admin/stats`;
+
+    try{
+      const r = await fetch(url, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      const txt = await r.text();
+      let data;
+      try { data = JSON.parse(txt); }
+      catch { data = { ok:false, error:"Resposta não é JSON", raw: txt }; }
+
+      if(!r.ok || !data.ok){
+        setStatus("bad","Erro");
+        el("msg").textContent = "❌ " + (data.error || `HTTP ${r.status}`);
+        if(rawVisible) showRaw(data);
+        return;
+      }
+
+      // Monta KPIs
+      const c = data.counts || {};
+      const mensal = Number(c.mensal || 0);
+      const trimestral = Number(c.trimestral || 0);
+      const anual = Number(c.anual || 0);
+      const total = Number(data.totalApproved ?? (mensal + trimestral + anual + Number(c.other||0)));
+
+      el("kMensal").textContent = mensal;
+      el("kTrimestral").textContent = trimestral;
+      el("kAnual").textContent = anual;
+      el("kTotal").textContent = total;
+
+      setStatus("ok","OK");
+      const range = data.range?.begin && data.range?.end ? `Período: ${data.range.begin} → ${data.range.end}` : "";
+      el("msg").textContent = "✅ Dados carregados. " + range;
+
+      if(rawVisible) showRaw(data);
+
+    }catch(e){
+      setStatus("bad","Falhou");
+      el("msg").textContent = "❌ Erro de rede: " + (e?.message || e);
+    }
+  };
+</script>
+
+</body>
+</html>
