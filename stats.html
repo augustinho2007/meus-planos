@@ -282,6 +282,7 @@
             <button id="btnFetch">Ver estatísticas</button>
             <button class="secondary" id="btnThisMonth" type="button">Este mês</button>
             <button class="danger" id="btnClear" type="button">Limpar</button>
+            <button class="danger" id="btnCancelPend" type="button" title="Cancela cobranças Pix pendentes/aguardando pagamento no Mercado Pago">Cancelar pendentes</button>
           </div>
 
           <div style="margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35;">
@@ -526,6 +527,42 @@
     resetKPIs();
     hideRaw();
     setStatus("ok","Pronto");
+  };
+
+
+  el("btnCancelPend").onclick = async () => {
+    const token = el("token").value.trim();
+    if (!token) return setStatus("bad","Token vazio");
+
+    const older = 10; // minutos (seguro). Se quiser, eu deixo isso editável depois.
+    const limit = 100;
+
+    if (!confirm(`Cancelar cobranças Pix pendentes (>= ${older} min)?\n\nIsso remove do Mercado Pago as pendentes criadas e marca como CANCELLED no painel.`)) {
+      return;
+    }
+
+    setStatus("","Cancelando...");
+    el("msg").textContent = "⏳ Cancelando pendentes...";
+
+    const r = await fetch(`${API_BASE}/admin/cancel-pending`, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ older_minutes: older, limit })
+    });
+
+    const d = await r.json().catch(()=>({}));
+    if (!r.ok) {
+      setStatus("bad","Falhou");
+      el("msg").textContent = "❌ Falha ao cancelar pendentes: " + (d.error || r.status);
+      return;
+    }
+
+    const failCount = Array.isArray(d.failed) ? d.failed.length : 0;
+    setStatus("ok","OK");
+    el("msg").textContent = `✅ Canceladas: ${d.cancelled}/${d.requested}. Falhas: ${failCount}.`;
   };
 
   let rawVisible = false;
