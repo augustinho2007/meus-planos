@@ -1,638 +1,330 @@
 <!doctype html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="color-scheme" content="dark">
-  <title>Painel ReadTV (Privado)</title>
-  <style>
-    :root{
-      --bg:#0b1220;
-      --panel:#0f1b2e;
-      --panel2:#0c1628;
-      --text:#eaf1ff;
-      --muted:#9bb0d1;
-      --line:rgba(255,255,255,.08);
-      --accent:#1ee3a4;      /* verde neon */
-      --accent2:#38a6ff;     /* azul neon */
-      --danger:#ff4d6d;
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius:16px;
-    }
-
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 700px at 20% 10%, rgba(56,166,255,.15), transparent 50%),
-                  radial-gradient(900px 600px at 90% 30%, rgba(30,227,164,.12), transparent 55%),
-                  var(--bg);
-      color:var(--text);
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      padding:18px;
-    }
-
-    .wrap{
-      width:min(980px, 100%);
-    }
-
-    header{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      margin:10px 0 16px;
-    }
-
-    .brand{
-      display:flex; gap:10px; align-items:center;
-    }
-    .logo{
-      width:42px; height:42px; border-radius:12px;
-      background: linear-gradient(135deg, rgba(56,166,255,.35), rgba(30,227,164,.25));
-      border:1px solid var(--line);
-      box-shadow: var(--shadow);
-    }
-    h1{
-      font-size:18px; margin:0;
-      letter-spacing:.2px;
-    }
-    .sub{
-      margin:2px 0 0;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .card-head{
-      padding:14px 14px 12px;
-      background: rgba(0,0,0,.12);
-      border-bottom:1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .card-head strong{
-      font-size:14px;
-      color: var(--text);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap:14px;
-      padding:14px;
-    }
-
-    @media (max-width: 820px){
-      .grid{ grid-template-columns: 1fr; }
-    }
-
-    label{
-      font-size:12px;
-      color: var(--muted);
-      display:block;
-      margin:0 0 6px;
-    }
-
-    input, select{
-      width:100%;
-      padding:12px 12px;
-      border-radius: 14px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      outline:none;
-    }
-    input:focus{
-      border-color: rgba(56,166,255,.45);
-      box-shadow: 0 0 0 4px rgba(56,166,255,.12);
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:end;
-    }
-    .row > div{ flex:1; min-width: 220px; }
-
-    .btns{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-
-    button{
-      cursor:pointer;
-      border:0;
-      border-radius: 14px;
-      padding:12px 14px;
-      font-weight:700;
-      letter-spacing:.2px;
-      color:#04131c;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 10px 22px rgba(30,227,164,.12);
-    }
-    button.secondary{
-      color: var(--text);
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      box-shadow:none;
-    }
-    button.danger{
-      color:#fff;
-      background: rgba(255,77,109,.14);
-      border: 1px solid rgba(255,77,109,.35);
-    }
-
-    .stats{
-      padding:14px;
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:10px;
-    }
-    @media (max-width: 820px){
-      .stats{ grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .kpi{
-      background: rgba(0,0,0,.16);
-      border:1px solid var(--line);
-      border-radius: 14px;
-      padding:12px;
-    }
-    .kpi .t{
-      color: var(--muted);
-      font-size:12px;
-      margin-bottom:6px;
-    }
-    .kpi .v{
-      font-size:22px;
-      font-weight:800;
-    }
-    .kpi small{
-      display:block;
-      color: var(--muted);
-      margin-top:4px;
-      font-size:11px;
-    }
-
-    .out{
-      padding:14px;
-      border-top:1px solid var(--line);
-      background: rgba(0,0,0,.12);
-    }
-    .msg{
-      margin:0;
-      color: var(--muted);
-      font-size:13px;
-    }
-    pre{
-      margin:12px 0 0;
-      padding:12px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.22);
-      border:1px solid var(--line);
-      color: #dfe9ff;
-      overflow:auto;
-      max-height: 280px;
-      display:none;
-    }
-
-    .pill{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding:6px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      color: var(--muted);
-      font-size:12px;
-      white-space:nowrap;
-    }
-
-    .dot{
-      width:8px;height:8px;border-radius:99px;
-      background: rgba(255,255,255,.35);
-    }
-    .dot.ok{ background: var(--accent); }
-    .dot.bad{ background: var(--danger); }
-
-    footer{
-      text-align:center;
-      padding:14px 0 0;
-      color: rgba(155,176,209,.75);
-      font-size:12px;
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Painel ReadTV (Privado)</title>
+<style>
+  :root{
+    --bg:#0b1020;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);
+    --txt:#eaf1ff;--muted:rgba(234,241,255,.72);--accent:#46e3b7;--danger:#ff4d6d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;background:radial-gradient(1100px 700px at 20% 10%,rgba(70,227,183,.14),transparent 55%),radial-gradient(900px 650px at 80% 0%,rgba(88,120,255,.18),transparent 55%),var(--bg);color:var(--txt)}
+  .wrap{max-width:1060px;margin:0 auto;padding:18px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 16px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,rgba(70,227,183,.9),rgba(88,120,255,.9));box-shadow:0 12px 28px rgba(0,0,0,.35)}
+  h1{font-size:16px;margin:0}
+  .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted);font-size:12px;white-space:nowrap}
+  .dot{width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35)}
+  .dot.ok{background:var(--accent)} .dot.bad{background:var(--danger)}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+  @media (max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.25)}
+  .head{padding:14px 14px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(255,255,255,.10)}
+  .body{padding:14px}
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+  input,select{width:100%;padding:12px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);outline:none}
+  input::placeholder{color:rgba(234,241,255,.45)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:520px){.row{grid-template-columns:1fr}}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  button{border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--txt);padding:11px 12px;border-radius:12px;cursor:pointer;font-weight:700}
+  button.primary{background:rgba(70,227,183,.18);border-color:rgba(70,227,183,.35)}
+  button.danger{background:rgba(255,77,109,.14);border-color:rgba(255,77,109,.35)}
+  button:disabled{opacity:.6;cursor:not-allowed}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media (max-width:820px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:rgba(0,0,0,.16);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .kpi .t{color:var(--muted);font-size:12px;margin-bottom:6px}
+  .kpi .v{font-size:22px;font-weight:800}
+  .kpi small{display:block;color:var(--muted);margin-top:4px;font-size:11px}
+  .msg{margin:0;color:var(--muted);font-size:13px}
+  pre{margin:12px 0 0;padding:12px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid var(--line);color:#dfe9ff;overflow:auto;max-height:280px;display:none}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.10);vertical-align:top}
+  th{color:var(--muted);font-weight:700;font-size:12px}
+  .muted{color:var(--muted)}
+  .right{text-align:right}
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  a{color:var(--txt);text-decoration:none}
+  a:hover{text-decoration:underline}
+  footer{text-align:center;padding:16px 0 4px;color:rgba(155,176,209,.75);font-size:12px}
+</style>
 </head>
-
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo"></div>
-        <div>
-          <h1>Painel ReadTV (Privado)</h1>
-          <div class="sub">Estatísticas de vendas por mês • Senha não é salva</div>
-        </div>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Painel ReadTV (Privado)</h1>
+        <div class="sub">Vendas por mês + vendedores • Senha não é salva</div>
       </div>
+    </div>
+    <span class="pill" id="statusPill"><span class="dot" id="statusDot"></span><span id="statusText">Pronto</span></span>
+  </header>
 
-      <span class="pill" id="statusPill">
-        <span class="dot" id="statusDot"></span>
-        <span id="statusText">Pronto</span>
-      </span>
-    </header>
-
+  <div class="grid">
     <div class="card">
-      <div class="card-head">
+      <div class="head">
         <strong>Consulta</strong>
-        <span class="pill">SERVER: <span id="apiLabel" style="color:#eaf1ff;margin-left:6px;"></span></span>
+        <span class="pill">SERVER: <span id="apiLabel" style="color:#eaf1ff;margin-left:6px"></span></span>
       </div>
-
-      <div class="grid">
-        <div>
-          <div class="row">
-            <div>
-              <label>Sua Senha</label>
-              <input id="token" type="password" placeholder="Cole sua senha aqui..." />
-            </div>
-            <div>
-              <label>Mês</label>
-              <input id="month" type="month" />
-            </div>
+      <div class="body">
+        <div class="row">
+          <div>
+            <label>Senha do painel (ADMIN_TOKEN)</label>
+            <input id="token" type="password" placeholder="Cole seu ADMIN_TOKEN aqui"/>
           </div>
-
-          <div class="btns">
-            <button id="btnFetch">Ver estatísticas</button>
-            <button class="secondary" id="btnThisMonth" type="button">Este mês</button>
-            <button class="danger" id="btnClear" type="button">Limpar</button>
-            <button class="danger" id="btnCancelPend" type="button" title="Cancela cobranças Pix pendentes/aguardando pagamento no Mercado Pago">Cancelar pendentes</button>
-          </div>
-
-          <div style="margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35;">
-            • Você pode abrir isso no celular pelo GitHub Pages. <br>
-            • O token <b>não fica salvo</b> (segurança). Você digita quando quiser consultar.
+          <div>
+            <label>Mês</label>
+            <input id="month" type="month"/>
           </div>
         </div>
 
-        <div class="card" style="background:rgba(0,0,0,.12);border:1px solid var(--line);">
-          <div class="card-head" style="background:transparent;border-bottom:1px solid var(--line);">
-            <strong>Resumo do mês</strong>
-            <span class="pill" id="monthLabel">—</span>
-          </div>
-
-          <div class="stats">
-            <div class="kpi">
-              <div class="t">Mensal</div>
-              <div class="v" id="kMensal">—</div>
-              <small>pagamentos aprovados</small>
-            </div>
-            <div class="kpi">
-              <div class="t">Trimestral</div>
-              <div class="v" id="kTrimestral">—</div>
-              <small>pagamentos aprovados</small>
-            </div>
-            <div class="kpi">
-              <div class="t">Anual</div>
-              <div class="v" id="kAnual">—</div>
-              <small>pagamentos aprovados</small>
-            </div>
-            <div class="kpi">
-              <div class="t">Total</div>
-              <div class="v" id="kTotal">—</div>
-              <small>no mês</small>
-            </div>
-          </div>
-
-          <div class="out">
-            <p class="msg" id="msg">Digite a sua Senha, selecione o mês e clique em “Ver estatísticas”.</p>
-            <pre id="raw"></pre>
-          </div>
+        <div class="btns">
+          <button class="primary" id="btnFetch">Ver estatísticas</button>
+          <button id="btnVendors">Atualizar vendedores</button>
+          <button id="btnThisMonth">Mês atual</button>
+          <button id="btnToggleRaw">Mostrar JSON</button>
+          <button class="danger" id="btnCancelPend">Cancelar pendentes (ReadTV)</button>
+          <button id="btnClear">Limpar</button>
         </div>
+
+        <div style="height:12px"></div>
+        <div class="stats">
+          <div class="kpi"><div class="t">Mensal</div><div class="v" id="kMensal">—</div><small>pagamentos aprovados</small></div>
+          <div class="kpi"><div class="t">Trimestral</div><div class="v" id="kTrimestral">—</div><small>pagamentos aprovados</small></div>
+          <div class="kpi"><div class="t">Anual</div><div class="v" id="kAnual">—</div><small>pagamentos aprovados</small></div>
+          <div class="kpi"><div class="t">Total</div><div class="v" id="kTotal">—</div><small>no mês</small></div>
+        </div>
+
+        <div style="height:12px"></div>
+        <p class="msg" id="msg">Digite a senha, selecione o mês e clique em “Ver estatísticas”.</p>
+        <pre id="raw"></pre>
       </div>
     </div>
 
-    
-      <div class="grid" style="margin-top:14px;">
-        <div class="card">
-          <h3>Vendedores</h3>
-          <div class="small">Crie links únicos para comissionar. Acesso sem <b>?v=</b> fica como <b>Sem vendedor</b>.</div>
-          <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-            <input id="vendorName" class="input" placeholder="Novo vendedor (ex: João)" style="flex:1; min-width:220px;">
-            <button class="btn" id="btnAddVendor" type="button">Adicionar</button>
-          </div>
-          <div class="small" style="margin-top:10px;">
-            Link padrão do vendedor: <span class="pill">https://readtv.com.br/?v=CODIGO</span>
-          </div>
-          <div id="vendorsList" style="margin-top:12px;"></div>
+    <div class="card">
+      <div class="head">
+        <strong>Vendedores</strong>
+        <span class="pill">comissão: R$ 5,00 / mês</span>
+      </div>
+      <div class="body">
+        <label>Novo vendedor</label>
+        <div class="row">
+          <input id="vendorName" placeholder="Ex: João"/>
+          <button class="primary" id="btnAddVendor">Adicionar</button>
         </div>
 
-        <div class="card">
-          <h3>Resumo por vendedor</h3>
-          <div class="small">Comissão: <b>R$ 5,00 por mês</b> (mensal=1 mês, trimestral=3, anual=12).</div>
-          <div id="vendorSummary" style="margin-top:12px;"></div>
-        </div>
+        <div style="height:10px"></div>
+        <div class="muted" style="font-size:12px">Links gerados: <span class="code">?v=CODIGO</span> (sem <span class="code">v</span>, fica “sem vendedor”).</div>
+
+        <div style="height:12px"></div>
+        <div id="vendorsBox" class="muted">—</div>
       </div>
-<footer>ReadTV • Painel privado</footer>
+    </div>
   </div>
 
+  <footer>ReadTV • Painel privado</footer>
+</div>
+
 <script>
-  const API_BASE = "https://pix.readtv.com.br"; // seu Worker custom domain
+  const API_BASE = "https://pix.readtv.com.br";
   document.getElementById("apiLabel").textContent = API_BASE;
 
-  const el = (id) => document.getElementById(id);
-
-  const COMMISSION_PER_MONTH = 5;
-
-  function escapeHtml(s){
-    return String(s ?? "").replace(/[&<>"']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[c]));
-  }
-
-  async function loadVendors(token, month){
-    const listEl = el("vendorsList");
-    const sumEl = el("vendorSummary");
-    if (!listEl || !sumEl) return;
-
-    // vendors list + stats for selected month
-    const vUrl = `${API_BASE}/admin/vendors?month=${encodeURIComponent(month)}`;
-    const sUrl = `${API_BASE}/admin/vendor-summary?month=${encodeURIComponent(month)}`;
-
-    const [vr, sr] = await Promise.all([
-      fetch(vUrl, { headers: { "Authorization": "Bearer " + token } }),
-      fetch(sUrl, { headers: { "Authorization": "Bearer " + token } }),
-    ]);
-
-    const vData = await vr.json().catch(()=>({}));
-    const sData = await sr.json().catch(()=>({}));
-
-    const vendors = Array.isArray(vData.vendors) ? vData.vendors : [];
-    const summary = sData || {};
-
-    // Render list
-    if (!vendors.length){
-      listEl.innerHTML = `<div class="small">Nenhum vendedor cadastrado ainda.</div>`;
-    } else {
-      listEl.innerHTML = vendors.map(v=>{
-        const link = `https://readtv.com.br/?v=${encodeURIComponent(v.code)}`;
-        return `
-          <div style="border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
-            <div>
-              <div><b>${escapeHtml(v.name)}</b> ${v.active ? "" : "<span class='pill' style='background:rgba(255,77,109,.18); border-color:rgba(255,77,109,.35);'>desativado</span>"}</div>
-              <div class="small">Link: <span class="pill">${escapeHtml(link)}</span> <button class="btn ghost" type="button" onclick="navigator.clipboard.writeText('${link}')">Copiar</button></div>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button class="btn danger" type="button" onclick="deleteVendor(${v.id})">Excluir</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    // Render summary
-    const sem = summary.sem_vendedor || { approved_months:0, approved_amount:0 };
-    const rows = Array.isArray(summary.vendors) ? summary.vendors : [];
-
-    const cardRow = (title, months, amount) => {
-      const comm = (Number(months||0) * COMMISSION_PER_MONTH);
-      return `
-        <div style="border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px;">
-          <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-            <div><b>${title}</b></div>
-            <div class="pill">Meses: ${Number(months||0)}</div>
-          </div>
-          <div class="small" style="margin-top:6px;">Aprovado: R$ ${Number(amount||0).toFixed(2).replace(".", ",")}</div>
-          <div class="small">Comissão: <b>R$ ${comm.toFixed(2).replace(".", ",")}</b></div>
-        </div>
-      `;
-    };
-
-    let html = "";
-    html += cardRow("Sem vendedor", sem.approved_months, sem.approved_amount);
-
-    if (!rows.length){
-      html += `<div class="small">Nenhuma venda atribuída a vendedores neste mês.</div>`;
-    } else {
-      html += rows.map(r=>cardRow(escapeHtml(r.name), r.approved_months, r.approved_amount)).join("");
-    }
-
-    sumEl.innerHTML = html;
-  }
-
-  async function addVendor(){
-    const token = el("token").value.trim();
-    const name = el("vendorName").value.trim();
-    const month = el("month").value;
-    if (!token) return setStatus("bad","Token vazio");
-    if (!name) return;
-
-    const r = await fetch(`${API_BASE}/admin/vendors`, {
-      method: "POST",
-      headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
-      body: JSON.stringify({ name })
-    });
-    const d = await r.json().catch(()=>({}));
-    if (!r.ok){
-      setStatus("bad","Falhou");
-      el("msg").textContent = "❌ Falha ao adicionar vendedor: " + (d.error || r.status);
-      return;
-    }
-    el("vendorName").value = "";
-    await loadVendors(token, month);
-  }
-
-  async function deleteVendor(id){
-    const token = el("token").value.trim();
-    const month = el("month").value;
-    if (!token) return setStatus("bad","Token vazio");
-
-    const r = await fetch(`${API_BASE}/admin/vendors?id=${encodeURIComponent(id)}`, {
-      method: "DELETE",
-      headers: { "Authorization": "Bearer " + token }
-    });
-    const d = await r.json().catch(()=>({}));
-    if (!r.ok){
-      setStatus("bad","Falhou");
-      el("msg").textContent = "❌ Falha ao excluir vendedor: " + (d.error || r.status);
-      return;
-    }
-    await loadVendors(token, month);
-  }
-
-
+  const el = (id)=>document.getElementById(id);
 
   function setStatus(type, text){
     el("statusText").textContent = text;
     el("statusDot").className = "dot " + (type === "ok" ? "ok" : type === "bad" ? "bad" : "");
   }
 
-  function toYYYYMM(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    return `${y}-${m}`;
-  }
+  function toYYYYMM(d){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); return `${y}-${m}`; }
+  function prettyMonthLabel(yyyymm){ if(!yyyymm) return "—"; const [y,m]=yyyymm.split("-"); return `${m}/${y}`; }
 
-  function prettyMonthLabel(yyyymm){
-    if(!yyyymm) return "—";
-    const [y,m] = yyyymm.split("-");
-    return `${m}/${y}`;
-  }
+  function resetKPIs(){ el("kMensal").textContent="—"; el("kTrimestral").textContent="—"; el("kAnual").textContent="—"; el("kTotal").textContent="—"; }
 
-  function resetKPIs(){
-    el("kMensal").textContent = "—";
-    el("kTrimestral").textContent = "—";
-    el("kAnual").textContent = "—";
-    el("kTotal").textContent = "—";
-    el("monthLabel").textContent = "—";
-  }
-
-  function showRaw(obj){
-    const raw = el("raw");
-    raw.style.display = "block";
-    raw.textContent = JSON.stringify(obj, null, 2);
-  }
-
-  function hideRaw(){
-    el("raw").style.display = "none";
-  }
+  function showRaw(obj){ const raw=el("raw"); raw.style.display="block"; raw.textContent=JSON.stringify(obj,null,2); }
+  function hideRaw(){ el("raw").style.display="none"; }
 
   el("month").value = toYYYYMM(new Date());
-  el("monthLabel").textContent = prettyMonthLabel(el("month").value);
   resetKPIs();
   setStatus("ok","Pronto");
 
-  el("btnThisMonth").onclick = () => {
-    el("month").value = toYYYYMM(new Date());
-    el("monthLabel").textContent = prettyMonthLabel(el("month").value);
-  };
+  el("btnThisMonth").onclick = ()=>{ el("month").value = toYYYYMM(new Date()); };
+  el("btnClear").onclick = ()=>{ el("token").value=""; el("vendorName").value=""; resetKPIs(); hideRaw(); el("vendorsBox").textContent="—"; el("msg").textContent="Digite a senha, selecione o mês e clique em “Ver estatísticas”."; setStatus("ok","Pronto"); };
 
-  el("btnClear").onclick = () => {
-    el("token").value = "";
-    el("msg").textContent = "Digite a sua Senha, selecione o mês e clique em “Ver estatísticas”.";
-    resetKPIs();
-    hideRaw();
-    setStatus("ok","Pronto");
-  };
+  let rawVisible=false;
+  el("btnToggleRaw").onclick = ()=>{ rawVisible=!rawVisible; el("btnToggleRaw").textContent = rawVisible ? "Ocultar JSON" : "Mostrar JSON"; if(!rawVisible) hideRaw(); };
 
+  function getToken(){ return el("token").value.trim(); }
+  function needToken(){
+    const t=getToken();
+    if(!t){ setStatus("bad","Token vazio"); el("msg").textContent="⚠️ Informe o token (ADMIN_TOKEN)."; return null; }
+    return t;
+  }
 
-  el("btnCancelPend").onclick = async () => {
-    const token = el("token").value.trim();
-    if (!token) return setStatus("bad","Token vazio");
-
-    const older = 10; // minutos (seguro). Se quiser, eu deixo isso editável depois.
-    const limit = 100;
-
-    if (!confirm(`Cancelar cobranças Pix pendentes (>= ${older} min)?\n\nIsso remove do Mercado Pago as pendentes criadas e marca como CANCELLED no painel.`)) {
-      return;
-    }
-
-    setStatus("","Cancelando...");
-    el("msg").textContent = "⏳ Cancelando pendentes...";
-
-    const r = await fetch(`${API_BASE}/admin/cancel-pending`, {
-      method: "POST",
+  async function apiFetch(path, opts={}){
+    const token=needToken(); if(!token) throw new Error("token vazio");
+    const r = await fetch(API_BASE + path, {
+      ...opts,
       headers: {
+        ...(opts.headers||{}),
         "Authorization": "Bearer " + token,
         "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ older_minutes: older, limit })
-    });
-
-    const d = await r.json().catch(()=>({}));
-    if (!r.ok) {
-      setStatus("bad","Falhou");
-      el("msg").textContent = "❌ Falha ao cancelar pendentes: " + (d.error || r.status);
-      return;
-    }
-
-    const failCount = Array.isArray(d.failed) ? d.failed.length : 0;
-    setStatus("ok","OK");
-    el("msg").textContent = `✅ Canceladas: ${d.cancelled}/${d.requested}. Falhas: ${failCount}.`;
-  };
-
-  let rawVisible = false;
-
-  el("btnFetch").onclick = async () => {
-    const token = el("token").value.trim();
-    const month = el("month").value; // "2025-12"
-
-    el("monthLabel").textContent = prettyMonthLabel(month);
-    hideRaw();
-
-    if(!token){
-      setStatus("bad","Token vazio");
-      el("msg").textContent = "⚠️ Informe o token (ADMIN_TOKEN).";
-      return;
-    }
-
-    setStatus("", "Consultando...");
-    el("msg").textContent = "Carregando dados...";
-
-    // Se seu Worker já aceita ?month=YYYY-MM, ótimo.
-    // Se ainda não, ele vai trazer o mês atual mesmo.
-    const url = month ? `${API_BASE}/admin/stats?month=${encodeURIComponent(month)}` : `${API_BASE}/admin/stats`;
-
-    try{
-      const r = await fetch(url, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-
-      const txt = await r.text();
-      let data;
-      try { data = JSON.parse(txt); }
-      catch { data = { ok:false, error:"Resposta não é JSON", raw: txt }; }
-
-      if(!r.ok || !data.ok){
-        setStatus("bad","Erro");
-        el("msg").textContent = "❌ " + (data.error || `HTTP ${r.status}`);
-        if(rawVisible) showRaw(data);
-        return;
       }
+    });
+    const txt = await r.text();
+    let data=null;
+    try{ data = txt ? JSON.parse(txt) : null; }catch{ data={ ok:false, error:"Resposta não é JSON", raw: txt }; }
+    if(!r.ok) throw new Error((data && (data.error||data.details)) ? (data.error||data.details) : ("HTTP "+r.status));
+    return data;
+  }
 
-      // Monta KPIs
+  el("btnFetch").onclick = async ()=>{
+    const token=needToken(); if(!token) return;
+    const month = el("month").value;
+    hideRaw();
+    setStatus("","Consultando...");
+    el("msg").textContent="Carregando dados...";
+    try{
+      const data = await apiFetch(`/admin/stats?month=${encodeURIComponent(month)}`, { method:"GET" });
       const c = data.counts || {};
       const mensal = Number(c.mensal || 0);
       const trimestral = Number(c.trimestral || 0);
       const anual = Number(c.anual || 0);
       const total = Number(data.totalApproved ?? (mensal + trimestral + anual + Number(c.other||0)));
-
-      el("kMensal").textContent = mensal;
-      el("kTrimestral").textContent = trimestral;
-      el("kAnual").textContent = anual;
-      el("kTotal").textContent = total;
-
+      el("kMensal").textContent=mensal;
+      el("kTrimestral").textContent=trimestral;
+      el("kAnual").textContent=anual;
+      el("kTotal").textContent=total;
       setStatus("ok","OK");
       const range = data.range?.begin && data.range?.end ? `Período: ${data.range.begin} → ${data.range.end}` : "";
       el("msg").textContent = "✅ Dados carregados. " + range;
-
-      // Carrega vendedores e resumo por vendedor
-      try { await loadVendors(token, month); } catch(e) { console.log(e); }
-
       if(rawVisible) showRaw(data);
-
     }catch(e){
-      setStatus("bad","Falhou");
-      el("msg").textContent = "❌ Erro de rede: " + (e?.message || e);
+      setStatus("bad","Erro");
+      el("msg").textContent = "❌ " + (e?.message || e);
     }
   };
 
-  if (el("btnAddVendor")) el("btnAddVendor").onclick = addVendor;
-</script>
+  function vendorRow(v){
+    const link = `${API_BASE}/pix.html?v=${encodeURIComponent(v.code)}`;
+    const status = v.active ? "" : " (inativo)";
+    const sold = Number(v.approved_months||0);
+    const com = (sold * 5).toFixed(2).replace(".",",");
+    const total = Number(v.approved_amount||0).toFixed(2).replace(".",",");
+    return `
+      <tr>
+        <td><strong>${escapeHtml(v.name)}</strong><div class="muted code">${escapeHtml(v.code)}${status}</div></td>
+        <td class="right">${sold}</td>
+        <td class="right">R$ ${total}</td>
+        <td class="right">R$ ${com}</td>
+        <td class="right">
+          <a class="code" href="${link}" target="_blank" rel="noopener">abrir</a>
+          &nbsp;•&nbsp;
+          <button class="danger" data-del="${v.id}" style="padding:8px 10px;border-radius:10px">Excluir</button>
+        </td>
+      </tr>
+    `;
+  }
 
+  function escapeHtml(s){
+    return String(s||"").replace(/[&<>"']/g, (c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  }
+
+  async function loadVendors(){
+    const token=needToken(); if(!token) return;
+    setStatus("","Carregando...");
+    try{
+      const month = el("month").value;
+      const data = await apiFetch(`/admin/vendors?month=${encodeURIComponent(month)}`, { method:"GET" });
+      const vendors = (data && data.vendors) ? data.vendors : [];
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Vendedor</th>
+              <th class="right">Meses</th>
+              <th class="right">Valor</th>
+              <th class="right">Comissão</th>
+              <th class="right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${vendors.length ? vendors.map(vendorRow).join("") : `<tr><td colspan="5" class="muted">Nenhum vendedor cadastrado.</td></tr>`}
+          </tbody>
+        </table>
+        <div style="height:10px"></div>
+        <div class="muted" style="font-size:12px">
+          <strong>Sem vendedor:</strong> entre direto no site (sem <span class="code">?v=</span>).
+        </div>
+      `;
+      el("vendorsBox").innerHTML = html;
+      // bind deletes
+      el("vendorsBox").querySelectorAll("[data-del]").forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          const id = btn.getAttribute("data-del");
+          if(!id) return;
+          btn.disabled = true;
+          try{
+            await apiFetch(`/admin/vendors?id=${encodeURIComponent(id)}`, { method:"DELETE" });
+            await loadVendors();
+          }catch(e){
+            alert("Erro ao excluir: " + (e?.message||e));
+          }finally{
+            btn.disabled=false;
+          }
+        });
+      });
+      setStatus("ok","OK");
+    }catch(e){
+      setStatus("bad","Erro");
+      el("vendorsBox").textContent = "❌ " + (e?.message||e);
+    }
+  }
+
+  el("btnVendors").onclick = loadVendors;
+  el("btnAddVendor").onclick = async ()=>{
+    const name = el("vendorName").value.trim();
+    if(!name){ alert("Digite um nome."); return; }
+    el("btnAddVendor").disabled = true;
+    try{
+      await apiFetch("/admin/vendors", { method:"POST", body: JSON.stringify({ name }) });
+      el("vendorName").value="";
+      await loadVendors();
+    }catch(e){
+      alert("Erro ao adicionar: " + (e?.message||e));
+    }finally{
+      el("btnAddVendor").disabled = false;
+    }
+  };
+
+  el("btnCancelPend").onclick = async ()=>{
+    const token=needToken(); if(!token) return;
+    const month = el("month").value;
+    if(!confirm("Cancelar TODOS os PIX pendentes gerados pelo ReadTV?")) return;
+    el("btnCancelPend").disabled = true;
+    setStatus("","Cancelando...");
+    try{
+      const data = await apiFetch(`/admin/cancel-pendings?month=${encodeURIComponent(month)}`, { method:"POST" });
+      setStatus("ok","OK");
+      el("msg").textContent = `✅ Canceladas: ${data.cancelled||0} • Atualizadas: ${data.updated||0} • Falhas: ${data.failed||0}`;
+      if(rawVisible) showRaw(data);
+      await loadVendors();
+    }catch(e){
+      setStatus("bad","Erro");
+      el("msg").textContent = "❌ " + (e?.message||e);
+    }finally{
+      el("btnCancelPend").disabled = false;
+    }
+  };
+
+  // auto load vendors once token entered and user clicks update (no auto to avoid leaking token by mistake)
+</script>
 </body>
 </html>
