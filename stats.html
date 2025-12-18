@@ -327,7 +327,50 @@
       </div>
     </div>
 
-    <footer>ReadTV • Painel privado</footer>
+    
+    <div class="card" style="margin-top:14px;">
+      <div class="card-head">
+        <strong>Vendedores</strong>
+        <span class="pill">Comissão: R$ 5,00 por venda</span>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="row">
+            <div>
+              <label>Novo vendedor</label>
+              <input id="sellerName" type="text" placeholder="Ex: João" />
+            </div>
+            <div style="min-width:160px;flex:0 0 160px">
+              <button id="btnAddSeller" type="button">Adicionar</button>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35;">
+            • Link do vendedor é: <b>https://readtv.com.br/?v=CODIGO</b><br>
+            • Acesse o site sem <b>?v=</b> para registrar “sem vendedor”.
+          </div>
+
+          <div class="out" style="margin-top:12px;">
+            <p class="msg" id="sellerMsg">Carregue os vendedores para ver a lista.</p>
+            <pre id="sellerRaw"></pre>
+          </div>
+        </div>
+
+        <div class="card" style="background:rgba(0,0,0,.12);border:1px solid var(--line);">
+          <div class="card-head" style="background:transparent;border-bottom:1px solid var(--line);">
+            <strong>Resumo por vendedor</strong>
+            <span class="pill" id="sellerMonthLabel">—</span>
+          </div>
+
+          <div style="padding:14px">
+            <div id="sellerTableWrap" style="overflow:auto;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<footer>ReadTV • Painel privado</footer>
   </div>
 
 <script>
@@ -444,9 +487,243 @@
       const range = data.range?.begin && data.range?.end ? `Período: ${data.range.begin} → ${data.range.end}` : "";
       el("msg").textContent = "✅ Dados carregados. " + range;
 
+      // também carrega vendedores + resumo do mês
+      await loadVendors();
+      await loadVendorStats(month);
+
       if(rawVisible) showRaw(data);
 
     }catch(e){
+
+  // ---------- Vendedores ----------
+  function esc(s){ return String(s ?? "").replace(/[&<>"]/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[c])); }
+
+  function tokenOrWarn(){
+    const t = el("token").value.trim();
+    if(!t){
+      setStatus("bad","Token vazio");
+      el("sellerMsg").textContent = "⚠️ Informe o token (ADMIN_TOKEN) para carregar/gerenciar vendedores.";
+      return "";
+    }
+    return t;
+  }
+
+  function showSellerRaw(obj){
+    const raw = el("sellerRaw");
+    raw.style.display = "block";
+    raw.textContent = JSON.stringify(obj, null, 2);
+  }
+
+  async function loadVendors(){
+    const token = tokenOrWarn();
+    if(!token) return;
+
+    setStatus("", "Carregando vendedores...");
+    try{
+      const r = await fetch(`${API_BASE}/admin/vendors`, { headers: { "Authorization": "Bearer " + token } });
+      const data = await r.json().catch(()=>({ ok:false, error:"Resposta não é JSON" }));
+      if(!r.ok || !data.ok){
+        setStatus("bad","Erro");
+        el("sellerMsg").textContent = "❌ " + (data.error || `HTTP ${r.status}`);
+        showSellerRaw(data);
+        return;
+      }
+
+      const sellers = Array.isArray(data.sellers) ? data.sellers : [];
+      if(!sellers.length){
+        el("sellerMsg").textContent = "Nenhum vendedor cadastrado ainda.";
+      }else{
+        el("sellerMsg").textContent = `Vendedores cadastrados: ${sellers.length}`;
+      }
+      showSellerRaw({ ok:true, sellers });
+
+      // render list with links + delete
+      const rows = sellers.map(s => {
+        const link = `https://readtv.com.br/?v=${encodeURIComponent(s.code)}`;
+        return `<tr>
+          <td style="padding:8px;border-bottom:1px solid var(--line)"><b>${esc(s.name)}</b><div style="color:var(--muted);font-size:12px">${esc(s.code)}</div></td>
+          <td style="padding:8px;border-bottom:1px solid var(--line);font-size:12px"><a href="${link}" target="_blank" rel="noopener" style="color:var(--accent2)">${esc(link)}</a></td>
+          <td style="padding:8px;border-bottom:1px solid var(--line);text-align:right">
+            <button class="danger" data-del="${esc(s.code)}" type="button" style="padding:8px 10px;border-radius:12px">Excluir</button>
+          </td>
+        </tr>`;
+      }).join("");
+
+      const html = `
+        <div style="margin-bottom:10px;color:var(--muted);font-size:12px">Lista de vendedores (clique no link para copiar/abrir)</div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Vendedor</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Link</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Ações</th>
+            </tr>
+          </thead>
+          <tbody>${rows || `<tr><td colspan="3" style="padding:10px;color:var(--muted)">Sem vendedores</td></tr>`}</tbody>
+        </table>
+      `;
+      // Reaproveita o wrap da tabela (lado direito)
+      // (o resumo por vendedor fica abaixo, então aqui só mostramos a lista dentro do pre "sellerRaw" e a tabela no resumo)
+      // Para não quebrar layout, mostramos a lista no mesmo lugar do resumo.
+      // Melhor: lista fica no pre, e a tabela no resumo:
+      // -> vamos anexar logo abaixo na área do resumo
+      const wrap = el("sellerTableWrap");
+      wrap.innerHTML = html + `<div id="vendorStats" style="margin-top:14px"></div>`;
+
+      // bind delete buttons
+      wrap.querySelectorAll('button[data-del]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const code = btn.getAttribute('data-del');
+          if(!code) return;
+          await deleteVendor(code);
+        });
+      });
+
+      setStatus("ok","OK");
+    }catch(e){
+      setStatus("bad","Erro");
+      el("sellerMsg").textContent = "❌ " + String(e && e.message ? e.message : e);
+    }
+  }
+
+  async function addVendor(){
+    const token = tokenOrWarn();
+    if(!token) return;
+
+    const name = el("sellerName").value.trim();
+    if(!name){
+      el("sellerMsg").textContent = "⚠️ Digite um nome para o vendedor.";
+      return;
+    }
+
+    setStatus("", "Adicionando...");
+    el("sellerMsg").textContent = "Salvando vendedor...";
+    try{
+      const r = await fetch(`${API_BASE}/admin/vendors`, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+      const data = await r.json().catch(()=>({ ok:false, error:"Resposta não é JSON" }));
+      if(!r.ok || !data.ok){
+        setStatus("bad","Erro");
+        el("sellerMsg").textContent = "❌ " + (data.error || `HTTP ${r.status}`);
+        showSellerRaw(data);
+        return;
+      }
+      el("sellerName").value = "";
+      el("sellerMsg").textContent = `✅ Vendedor criado: ${data.name} (${data.code})`;
+      await loadVendors();
+      await loadVendorStats(el("month").value);
+      setStatus("ok","OK");
+    }catch(e){
+      setStatus("bad","Erro");
+      el("sellerMsg").textContent = "❌ " + String(e && e.message ? e.message : e);
+    }
+  }
+
+  async function deleteVendor(code){
+    const token = tokenOrWarn();
+    if(!token) return;
+
+    setStatus("", "Excluindo...");
+    el("sellerMsg").textContent = `Excluindo ${code}...`;
+    try{
+      const r = await fetch(`${API_BASE}/admin/vendors?code=${encodeURIComponent(code)}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await r.json().catch(()=>({ ok:false, error:"Resposta não é JSON" }));
+      if(!r.ok || !data.ok){
+        setStatus("bad","Erro");
+        el("sellerMsg").textContent = "❌ " + (data.error || `HTTP ${r.status}`);
+        showSellerRaw(data);
+        return;
+      }
+      el("sellerMsg").textContent = "✅ Vendedor excluído.";
+      await loadVendors();
+      await loadVendorStats(el("month").value);
+      setStatus("ok","OK");
+    }catch(e){
+      setStatus("bad","Erro");
+      el("sellerMsg").textContent = "❌ " + String(e && e.message ? e.message : e);
+    }
+  }
+
+  async function loadVendorStats(month){
+    const token = tokenOrWarn();
+    if(!token) return;
+
+    el("sellerMonthLabel").textContent = prettyMonthLabel(month);
+    setStatus("", "Carregando resumo...");
+    try{
+      const url = month ? `${API_BASE}/admin/vendor-stats?month=${encodeURIComponent(month)}` : `${API_BASE}/admin/vendor-stats`;
+      const r = await fetch(url, { headers: { "Authorization": "Bearer " + token } });
+      const data = await r.json().catch(()=>({ ok:false, error:"Resposta não é JSON" }));
+      if(!r.ok || !data.ok){
+        setStatus("bad","Erro");
+        el("sellerMsg").textContent = "❌ " + (data.error || `HTTP ${r.status}`);
+        showSellerRaw(data);
+        return;
+      }
+
+      const sellers = Array.isArray(data.sellers) ? data.sellers : [];
+      const sem = data.sem_vendedor || { total:0, mensal:0, trimestral:0, anual:0, commission:0 };
+
+      const toBRL = (n)=> (Number(n||0)).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+      const head = `
+        <div style="margin:12px 0 8px;color:var(--muted);font-size:12px">Apenas pagamentos <b>aprovados</b> no mês</div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Vendedor</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Mensal</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Trim.</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Anual</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Total</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px">Comissão</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      const row = (name, mensal, tri, anual, total, commission) => `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid var(--line)"><b>${esc(name)}</b></td>
+          <td style="padding:8px;border-bottom:1px solid var(--line);text-align:right">${Number(mensal||0)}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--line);text-align:right">${Number(tri||0)}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--line);text-align:right">${Number(anual||0)}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--line);text-align:right"><b>${Number(total||0)}</b></td>
+          <td style="padding:8px;border-bottom:1px solid var(--line);text-align:right"><b>${toBRL(commission||0)}</b></td>
+        </tr>
+      `;
+
+      const body = sellers.map(s => row(s.name || s.code, s.mensal, s.trimestral, s.anual, s.total, s.commission)).join("")
+        + row("Sem vendedor (acesso direto)", sem.mensal, sem.trimestral, sem.anual, sem.total, sem.commission);
+
+      const tail = `</tbody></table>`;
+
+      const statsWrap = document.getElementById("vendorStats");
+      if(statsWrap){
+        statsWrap.innerHTML = head + body + tail;
+      }else{
+        // fallback
+        el("sellerTableWrap").innerHTML += `<div id="vendorStats">${head + body + tail}</div>`;
+      }
+
+      setStatus("ok","OK");
+    }catch(e){
+      setStatus("bad","Erro");
+      el("sellerMsg").textContent = "❌ " + String(e && e.message ? e.message : e);
+    }
+  }
+
+  // buttons
+  el("btnAddSeller").onclick = addVendor;
+
+
+
       setStatus("bad","Falhou");
       el("msg").textContent = "❌ Erro de rede: " + (e?.message || e);
     }
