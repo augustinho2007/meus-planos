@@ -310,7 +310,10 @@ transform:rotate(-8deg);animation:scrollprog 6s linear infinite;opacity:.9}
     a.addEventListener('click', (e) => {
       e.preventDefault();
       const plan = a.getAttribute('data-plan');
-      const url = PIX_URL_BASE + "?plan=" + encodeURIComponent(plan);
+      const qs = new URLSearchParams(window.location.search);
+      const v = qs.get("v") || qs.get("seller") || "";
+      let url = PIX_URL_BASE + "?plan=" + encodeURIComponent(plan);
+      if (v) url += "&v=" + encodeURIComponent(v);
       window.open(url, "_blank", "noopener");
     });
   });
