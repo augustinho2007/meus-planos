@@ -305,15 +305,19 @@ transform:rotate(-8deg);animation:scrollprog 6s linear infinite;opacity:.9}
   // ✅ URL do seu Worker Pix
   const PIX_URL_BASE = "https://pix.readtv.com.br/pix.html";
 
+  // ✅ Vendedor (opcional): se abrir o site com ?v=CODIGO, repassa pro Pix
+  const qs = new URLSearchParams(window.location.search);
+  const vendorCode = (qs.get("v") || "").trim();
+
+
+
   // ✅ ao clicar em "Quero este plano", abre Pix já no plano certo
   document.querySelectorAll('a[data-plan]').forEach((a) => {
     a.addEventListener('click', (e) => {
       e.preventDefault();
       const plan = a.getAttribute('data-plan');
-      const qs = new URLSearchParams(window.location.search);
-      const v = qs.get("v") || qs.get("seller") || "";
       let url = PIX_URL_BASE + "?plan=" + encodeURIComponent(plan);
-      if (v) url += "&v=" + encodeURIComponent(v);
+      if (vendorCode) url += "&v=" + encodeURIComponent(vendorCode);
       window.open(url, "_blank", "noopener");
     });
   });
